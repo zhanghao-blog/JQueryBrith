@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jquery 封装原理</title>
+    <style>
+        .flex-container {
+            list-style: none;
+
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .flex-item {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+<ul class="flex-container">
+    <li class="flex-item"><img src="//placehold.it/300&text=1"></li>
+    <li class="flex-item"><img src="//placehold.it/300&text=2"></li>
+    <li class="flex-item"><img src="//placehold.it/300&text=3"></li>
+    <li class="flex-item"><img src="//placehold.it/300&text=4"></li>
+    <li class="flex-item"><img src="//placehold.it/300&text=5"></li>
+    <li class="flex-item"><img src="//placehold.it/300&text=6"></li>
+</ul>
+</body>
+<script type="text/javascript">
+    /*
+    * JQuery 封装策略
+    * 使用匿名函数封装避免变量环境污染
+    * 给window对象赋予属性$
+    *
+    * */
+    (function(){
+        var $=function(selector,context){
+            return new $.fn(selector,context);
+        }
+        // 使用$.fn原因是$已经被使用
+        $.fn=function(selector,context){
+            return this.init(selector,context);//这个this 指向$.fn对象
+        }
+        $.fn.prototype.init=function (selector,context) {
+            // querySelectorAll 兼容到ie8+
+            var nodeList=(context||document).querySelectorAll(selector);
+            this.length=nodeList.length;
+            for(var i=0;i<this.length;i++){
+                this[i]=nodeList[i];
+            }
+            return this;
+        }
+        $.fn.prototype.each=function (fn) {
+            for(var i=0;i<this.length;i++){
+                fn.call(this[i])//fn为构造函数，call将this[i]指向fn并继承fn的属性，注意区别apply,apply以数组形式传递参数
+            }
+            return this;
+        }
+        $.fn.prototype.hide=function () {
+            this.each(function () {
+                this.style.display='none';
+            })
+        }
+        $.fn.prototype.show=function () {
+            this.each(function () {
+                this.style.display='block';
+            })
+        }
+        window.$=$;//打开接口方法
+    })()
+
+</script>
+</html>
